@@ -30,7 +30,7 @@
 package org.tinfour.gis.shapefile;
 
 /**
- * An enumeration defining Shapefile
+ * An enumeration defining the feature geometry represented by a shapefile
  */
 public enum ShapefileType {
   NullShape(0, false, false),
@@ -60,7 +60,7 @@ public enum ShapefileType {
   }
 
   /**
-   * Resolves the numeric code from a Shapefile to an enumeration instances
+   * Resolves the numeric code from a shapefile to an enumeration instances
    *
    * @param code a valid integer code
    * @return if successful, a valid instance; otherwise, a null.
@@ -76,7 +76,7 @@ public enum ShapefileType {
   }
 
   /**
-   * Gets the integer code value for this Shapefile type.
+   * Gets the integer code value for this shapefile type.
    *
    * @return a positive integer
    */
@@ -85,27 +85,34 @@ public enum ShapefileType {
   }
 
   /**
-   * Indicates if the specified Shapefile type defines a polygon geometry.
+   * Indicates if the specified shapefile type defines a polygon geometry.
    * Polygons are treated as being different than polylines.
    *
-   * @return true if the type is a polygon; otherwise, false
+   * @return true if the type represents polygon features; otherwise, false.
    */
   public boolean isPolygon() {
     return this == PolygonZ || this == Polygon || this == PolygonM;
   }
 
   /**
-   * Indicates if the specified Shapefile type defines a polyline geometry.
+   * Indicates if the specified shapefile type defines a polyline geometry.
    * Polylines are treated as being different than polygons.
    *
-   * @return true if the type is a polyline; otherwise, false
+   * @return true if the type represents polyline features; otherwise, false.
    */
   public boolean isPolyLine() {
     return this == PolyLineZ || this == PolyLine || this == PolyLineM;
   }
 
+  /** Indicates whether the specified shapefile defines a point geometry.
+   * @return true if the type represents point features; otherwise, false.
+   */
+  public boolean isPoint(){
+    return this == Point || this == PointZ || this==PointM;
+  }
+
   /**
-   * Indicates whether the Shapefile has non-zero Z coordinates
+   * Indicates whether the shapefile has non-zero Z coordinates
    * (is three-dimensional).
    *
    * @return true if the file is three-dimensional; otherwise, false.
@@ -115,7 +122,7 @@ public enum ShapefileType {
   }
 
   /**
-   * Indicates whether the Shapefile has valid Z coordinates
+   * Indicates whether the shapefile has valid Z coordinates
    * (is three-dimensional).
    *
    * @return true if the file is has valid Z coordinates; otherwise, false.
@@ -125,7 +132,7 @@ public enum ShapefileType {
   }
 
   /**
-   * Indicates whether the Shapefile type has a measure specification
+   * Indicates whether the shapefile type has a measure specification
    *
    * @return true if the file has a measure specification; otherwise, false.
    */

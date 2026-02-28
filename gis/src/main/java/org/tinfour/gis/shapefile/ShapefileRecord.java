@@ -89,6 +89,62 @@ public class ShapefileRecord {
   }
 
   /**
+   * Sets a single point for a shapefile record. This method is appropriate
+   * when writing to shapefiles of type Point.
+   * <p>
+   * At this time, this class does not implement geometry checking for the
+   * inputs. It is assumed that the calling application is providing
+   * point values for the appropriate shapefile type of Point.
+   * @param x the X coordinate for the input point feature
+   * @param y the Y coordinate for the input point feature
+   */
+  public void setPoint(double x, double y){
+    if(xyz == null){
+      // set the array size big enough for z coordinate as a precaution
+      xyz = new double[6];
+    }
+    this.nParts = 1;
+    this.nPoints = 1;
+    this.xyz[0] = x;
+    this.xyz[1] = y;
+    this.x0 = x;
+    this.y0 = y;
+    this.x1 = x;
+    this.y1 = y;
+  }
+
+
+   /**
+   * Sets a single point for a shapefile record. This method is appropriate
+   * when writing to shapefiles of type PointZ.
+   * <p>
+   * At this time, this class does not implement geometry checking for the
+   * inputs. It is assumed that the calling application is providing
+   * point values for the appropriate shapefile of type PointZ.
+   * @param x the X coordinate for the input point feature
+   * @param y the Y coordinate for the input point feature
+   * @param z the Z coordinate for the input point feature
+   */
+  public void setPointZ(double x, double y, double z){
+    if (xyz == null) {
+      xyz = new double[6];
+    }
+    this.nParts = 1;
+    this.nPoints = 1;
+    this.xyz[0] = x;
+    this.xyz[1] = y;
+    this.xyz[2] = z;
+    this.x0 = x;
+    this.y0 = y;
+    this.x1 = x;
+    this.y1 = y;
+    this.z0 = z;
+    this.z1 = z;
+  }
+
+
+
+  /**
    * Adds a new polygon to current Shapefile record. The specified
    * points are provided in a one-dimensional array. If the Shapefile
    * does not have z coordinates, then the array is given as

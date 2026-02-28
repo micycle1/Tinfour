@@ -394,6 +394,39 @@ public class ShapefileWriter implements Closeable {
         shapeIndex.writeInt((int) (recordOffset / 2L));
         shapeIndex.writeInt(contentLength / 2);
         break;
+
+      case Point:
+        // size specification ------------------
+        //   The point types do not write values for the bounds
+        //   since the minimum and maximum values would be the same
+        //   as the single point coordinate.  So the content size is fixed.
+        //
+
+        contentLength = 4 + 2 * 8;
+        shapefile.writeInt(contentLength / 2); // content length in 2-byte words
+        shapefile.leWriteInt(spec.shapefileType.getTypeCode());
+        shapefile.leWriteDouble(record.x0);
+        shapefile.leWriteDouble(record.y0);
+                shapeIndex.writeInt((int) (recordOffset / 2L));
+        shapeIndex.writeInt(contentLength / 2);
+        break;
+
+      case PointZ:
+        // size specification ------------------
+        //   The point types do not write values for the bounds
+        //   since the minimum and maximum values would be the same
+        //   as the single point coordinate.  So the content size is fixed.
+        //
+        contentLength = 4 + 3 * 8;
+        shapefile.writeInt(contentLength / 2); // content length in 2-byte words
+        shapefile.leWriteInt(spec.shapefileType.getTypeCode());
+        shapefile.leWriteDouble(record.x0);
+        shapefile.leWriteDouble(record.y0);
+        shapefile.leWriteDouble(record.z0);
+                shapeIndex.writeInt((int) (recordOffset / 2L));
+        shapeIndex.writeInt(contentLength / 2);
+        break;
+
       default:
         throw new IOException("Unsupported type " + spec.shapefileType);
     }

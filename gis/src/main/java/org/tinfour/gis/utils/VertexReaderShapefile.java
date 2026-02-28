@@ -24,7 +24,6 @@
  * 12/2018 G. Lucas  Created
  *
  * Notes:
- *  * Notes:
  *   Future Work: This module has some logic for handling the
  *   the Well-Known Format used by .prj files. It should be replaced with
  *   a centralized treatment.  See also the ShapefileReader for this discussion.
@@ -33,10 +32,8 @@
  */
 package org.tinfour.gis.utils;
 
-import org.tinfour.utils.loaders.IVerticalCoordinateTransform;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +47,7 @@ import org.tinfour.utils.LinearUnits;
 import org.tinfour.utils.loaders.CoordinatePair;
 import org.tinfour.utils.loaders.ICoordinateTransform;
 import org.tinfour.utils.loaders.IVertexReader;
+import org.tinfour.utils.loaders.IVerticalCoordinateTransform;
 import org.tinfour.utils.loaders.SimpleGeographicTransform;
 
 /**
@@ -75,7 +73,7 @@ public class VertexReaderShapefile implements IVertexReader, Closeable {
   /**
    * Construct an instance for the specified Shapefile
    *
-   * @param file a Shapefile reference
+   * @param file a shapefile reference
    * @throws java.io.IOException in the event of an unrecoverable I/O condition
    *
    */
@@ -104,7 +102,7 @@ public class VertexReaderShapefile implements IVertexReader, Closeable {
    * coordinates for data.
    *
    * @param dbfFieldForZ a valid string, or a null to use the Z coordinates from
-   * the Shapefile geometry file (the &#48;shp file).
+   * the shapefile geometry file (the &#48;shp file).
    */
   public void setDbfFieldForZ(String dbfFieldForZ) {
     if (dbfFieldForZ != null) {
@@ -211,16 +209,16 @@ public class VertexReaderShapefile implements IVertexReader, Closeable {
   }
 
   /**
-   * Read the records from the Shapefile and use them to populate vertices. The
+   * Read the records from the shapefile and use them to populate vertices. The
    * loader has the option of loading the z coordinate from either the main
-   * Shapefile itself (the SHP file) or from the associated DBF file. If you
+   * shapefile itself (the SHP file) or from the associated DBF file. If you
    * wish to use a field in the DBF file as a z coordinate, specify the name of
    * the field as an argument. If you wish to use the z coordinate from the
    * Shapefile, specify a null or empty string. If a null or empty string is
-   * specified, and the Shapefile does not contain a feature type that provides
+   * specified, and the shapefile does not contain a feature type that provides
    * z coordinates, the z coordinates will be uniformly populated with zeroes.
    * <p>
-   * The index of the vertex is set to be the Shapefile record number. Thus many
+   * The index of the vertex is set to be the shapefile record number. Thus many
    * vertices may be assigned with the same record number, particularly if the
    * input is a polygon or line feature.
    * @param monitor an optional progress monitor, or null if not required.
@@ -367,18 +365,17 @@ public class VertexReaderShapefile implements IVertexReader, Closeable {
 
   private void checkForGeographicCoordinates(ShapefileReader reader)
           throws IOException {
-    File target = reader.getCoFile("prj");
-    if (target != null) {
-      try (FileInputStream fins = new FileInputStream(target)) {
-        StringBuilder sb = new StringBuilder();
-        byte[] buffer = new byte[8192];
-        int n;
-        while ((n = fins.read(buffer)) > 0) {
-          for (int i = 0; i < n; i++) {
-            sb.append((char) (buffer[i]));
+    try {
+      String content = reader.getPrjContent();
+      if (content != null && !content.isEmpty()) {
+        content = content.toUpperCase();
+        int indexUnit = content.indexOf("UNIT");
+        if (indexUnit > 0) {
+          if (content.indexOf("FOOT") > indexUnit || content.indexOf("FEET") > indexUnit) {
+            linearUnits = LinearUnits.FEET;
           }
         }
-        String content = sb.toString().toUpperCase();
+
         int indexPROJ = content.indexOf("PROJ");
         if (indexPROJ >= 0) {
           return; // not geographic
@@ -388,17 +385,9 @@ public class VertexReaderShapefile implements IVertexReader, Closeable {
           // definitely geographic
           geographicCoordinates = true;
         }
-
-        int indexUnit=content.indexOf("UNIT");
-        if(indexUnit>0){
-          if(content.indexOf("FOOT")>indexUnit || content.indexOf("FEET")>indexUnit){
-            linearUnits = LinearUnits.FEET;
-          }
-        }
-
-      } catch (IOException ioex) {
-        // NOPMD no action required
       }
+    } catch (IOException ioex) {
+      // no action required
     }
 
     double x0 = reader.getMinX();
@@ -407,10 +396,15 @@ public class VertexReaderShapefile implements IVertexReader, Closeable {
     double y1 = reader.getMaxY();
     double dx = x1 - x0;
     double dy = y1 - y0;
-    geographicCoordinates
-            = dx <= 360 && dy < 90
-            && -180 <= x0 && x1 < 180
-            && -90 <= y0 && y1 <= 90;
+
+    if (!geographicCoordinates) {
+      // the code couldn't determine geographic versus projected coordinates
+      // based on the .prj file.  decide based on range of coordinates
+      geographicCoordinates
+        = dx <= 360 && dy < 90
+        && -180 <= x0 && x1 < 180
+        && -90 <= y0 && y1 <= 90;
+    }
 
     if (geographicCoordinates) {
       double xCenter = (x0 + x1) / 2.0;
@@ -420,7 +414,6 @@ public class VertexReaderShapefile implements IVertexReader, Closeable {
                       yCenter,
                       xCenter,
                       linearUnits);
-
     }
   }
 
@@ -444,7 +437,7 @@ public class VertexReaderShapefile implements IVertexReader, Closeable {
   /**
    * Gets the linear units for the horizontal coordinate system from
    * the Shapefile. This value is typically obtained from the
-   * PRJ file associated with the Shapefile.
+   * PRJ file associated with the shapefile.
    * @return a valid enumeration instance
    */
   public LinearUnits getLinearUnits(){

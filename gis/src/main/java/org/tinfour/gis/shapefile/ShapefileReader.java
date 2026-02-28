@@ -556,4 +556,25 @@ public class ShapefileReader implements Closeable {
     }
     return raf.getFilePosition();
   }
+
+  /**
+   * Gets the content of the &#46;prj sidecar file for the shapefile.
+   * @return if available, a valid non-empty string; otherwise, an empty string.
+   * @throws IOException in the event of an unrecoverable IO exception.
+   */
+  public String getPrjContent() throws IOException {
+    File target = this.getCoFile("prj");
+    StringBuilder sb = new StringBuilder();
+
+    try (FileInputStream fins = new FileInputStream(target)) {
+      byte[] buffer = new byte[8192];
+      int n;
+      while ((n = fins.read(buffer)) > 0) {
+        for (int i = 0; i < n; i++) {
+          sb.append((char) (buffer[i]));
+        }
+      }
+    }
+    return sb.toString();
+  }
 }

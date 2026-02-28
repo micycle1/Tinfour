@@ -49,6 +49,8 @@ public class ShapefileWriterSpecification {
    * Sets the type of shapefile for output. At this time, only the following
    * Shapefile types are supported.
    * <ul>
+   * <li>Point</li>
+   * <li>PointZ<li>
    * <li>Polygon</li>
    * <li>PolygonZ</li>
    * <li>Polyline</li>
@@ -58,7 +60,11 @@ public class ShapefileWriterSpecification {
    * @param type a valid enumeration value
    */
   public void setShapefileType(ShapefileType type) {
-    if (!(type.isPolygon() || type.isPolyLine()) || type.hasM()) {
+    if (type.hasM()) {
+      throw new IllegalArgumentException("Shapefile \"Measured\" types are not supported, input type: " + type.name());
+    }
+
+    if (!(type.isPolygon() || type.isPolyLine() || type.isPoint())) {
       throw new IllegalArgumentException("Shapefile type: " + type.name()
         + " is not yet supported");
     }
