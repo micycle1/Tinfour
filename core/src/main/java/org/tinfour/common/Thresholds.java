@@ -52,6 +52,31 @@ public class Thresholds {
   public static final double VERTEX_TOLERANCE_FACTOR_DEFAULT = 1.0e+5;
 
   /**
+   * The unit round-off for IEEE-754 double-precision arithmetic, 2<sup>-53</sup>.
+   * This is half of {@code Math.ulp(1.0)} and represents the maximum relative
+   * error introduced by a single rounded floating-point operation.
+   */
+  public static final double DOUBLE_PRECISION_EPSILON = 0x1.0p-53; // 2^-53 ~ 1.11e-16
+
+  /**
+   * Relative error bound for the ordinary-precision in-circle determinant.
+   * <p>
+   * Unlike the absolute thresholds above (which are keyed to the nominal point
+   * spacing), this bound is applied to a "permanent" derived from the magnitude
+   * of the terms in the determinant actually being evaluated. The result is an
+   * adaptive criterion that remains valid regardless of the magnitude of the
+   * input coordinates: whenever the magnitude of an ordinary-precision in-circle
+   * result is no larger than this bound times the permanent, the sign of the
+   * result cannot be trusted and an extended-precision evaluation is required.
+   * <p>
+   * The value follows the {@code iccerrboundA} constant from Jonathan Shewchuk's
+   * "Adaptive Precision Floating-Point Arithmetic and Fast Robust Geometric
+   * Predicates" (Discrete &amp; Computational Geometry, 1997).
+   */
+  public static final double IN_CIRCLE_ERROR_BOUND
+    = (10.0 + 96.0 * DOUBLE_PRECISION_EPSILON) * DOUBLE_PRECISION_EPSILON;
+
+  /**
    * The nominal point spacing value specified in the constructor.
    * In general, this value is a rough estimate of the
    * mean distance between neighboring points (or vertices).

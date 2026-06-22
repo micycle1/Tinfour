@@ -175,12 +175,33 @@ public class GeometricOperations {
     // involve squared terms.  We do not want to take a difference between
     // once of these and a non-squared term because we do not want to
     // lose precision in the low-order digits.
+    double s1 = a11 * a11 + a12 * a12;
+    double s2 = a21 * a21 + a22 * a22;
+    double s3 = a31 * a31 + a32 * a32;
+    double p1 = a21 * a32;
+    double p2 = a31 * a22;
+    double p3 = a31 * a12;
+    double p4 = a11 * a32;
+    double p5 = a11 * a22;
+    double p6 = a21 * a12;
     double inCircle
-      = (a11 * a11 + a12 * a12) * (a21 * a32 - a31 * a22)
-      + (a21 * a21 + a22 * a22) * (a31 * a12 - a11 * a32)
-      + (a31 * a31 + a32 * a32) * (a11 * a22 - a21 * a12);
+      = s1 * (p1 - p2)
+      + s2 * (p3 - p4)
+      + s3 * (p5 - p6);
 
-    if (-inCircleThreshold < inCircle && inCircle < inCircleThreshold) {
+    // Decide whether the ordinary-precision result can be trusted using an
+    // adaptive error bound (Shewchuk).  The bound scales with the magnitude of
+    // the terms actually computed, so it remains valid for input coordinates of
+    // arbitrarily large magnitude -- unlike the fixed inCircleThreshold, which
+    // is keyed to the nominal point spacing and under-escalates for coordinates
+    // whose magnitude greatly exceeds that spacing.
+    double permanent
+      = s1 * (Math.abs(p1) + Math.abs(p2))
+      + s2 * (Math.abs(p3) + Math.abs(p4))
+      + s3 * (Math.abs(p5) + Math.abs(p6));
+    double errBound = Thresholds.IN_CIRCLE_ERROR_BOUND * permanent;
+
+    if (-errBound <= inCircle && inCircle <= errBound) {
       this.nExtendedPrecisionInCircle++;
       double inCircle2 = this.inCircleQuadPrecision(ax, ay, bx, by, cx, cy, dx, dy);
 
