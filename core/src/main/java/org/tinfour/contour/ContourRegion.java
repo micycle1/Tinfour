@@ -29,9 +29,9 @@
  */
 package org.tinfour.contour;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
+import org.tinfour.geom.GeoAffineTransform;
+import org.tinfour.geom.GeoPath;
+import org.tinfour.geom.GeoPoint;
 import java.util.ArrayList;
 import java.util.List;
 import org.tinfour.contour.Contour.ContourType;
@@ -375,7 +375,7 @@ public class ContourRegion {
   }
 
   /**
-   * Gets a Path2D suitable for rendering purposes. The path includes only the
+   * Gets a GeoPath suitable for rendering purposes. The path includes only the
    * outer polygon for the region and does not include the internal (nested)
    * polygons. Because the contour builder class sorts polygons by descending
    * area, this method will general attain the same effect as the conventional
@@ -383,39 +383,39 @@ public class ContourRegion {
    * method is not suitable in cases where interior regions are to be omitted
    * or filled with a semi-transparent color.
    *
-   * @param transform a valid AffineTransform, typically specified to map the
+   * @param transform a valid GeoAffineTransform, typically specified to map the
    * Cartesian coordinates of the contour to pixel coordinate.
    * @return a valid instance
    */
-  public Path2D getPath2DWithoutNesting(AffineTransform transform) {
-    AffineTransform af = transform;
+  public GeoPath getPath2DWithoutNesting(GeoAffineTransform transform) {
+    GeoAffineTransform af = transform;
     if (af == null) {
-      af = new AffineTransform();  // identity transform
+      af = new GeoAffineTransform();  // identity transform
     }
     double[] xy = getXY();
-    Path2D path = new Path2D.Double();
+    GeoPath path = new GeoPath();
     appendPathForward(af, path, xy);
     return path;
   }
 
   /**
-   * Gets a Path2D suitable for rendering purposes including both the outer
+   * Gets a GeoPath suitable for rendering purposes including both the outer
    * polygon and any internal (nested child) polygons. In used for fill
    * operations, regions that include nested child regions will be rendered with
    * "holes" where the child polygons are indicated.
    *
-   * @param transform a valid AffineTransform, typically specified to map the
+   * @param transform a valid GeoAffineTransform, typically specified to map the
    * Cartesian coordinates of the contour to pixel coordinate.
    * @return a valid instance
    */
-  public Path2D getPath2D(AffineTransform transform) {
-    AffineTransform af = transform;
+  public GeoPath getPath2D(GeoAffineTransform transform) {
+    GeoAffineTransform af = transform;
     if (af == null) {
-      af = new AffineTransform();  // identity transform
+      af = new GeoAffineTransform();  // identity transform
     }
     double[] xy = getXY();
-    Path2D path = new Path2D.Double();
-    path.setWindingRule(Path2D.WIND_EVEN_ODD);
+    GeoPath path = new GeoPath();
+    path.setWindingRule(GeoPath.WIND_EVEN_ODD);
     appendPathForward(transform, path, xy);
     for (ContourRegion child : children) {
       xy = child.getXY();
@@ -426,7 +426,7 @@ public class ContourRegion {
   }
 
   private void appendPathForward(
-    AffineTransform transform, Path2D path, double[] xy) {
+    GeoAffineTransform transform, GeoPath path, double[] xy) {
     int n = xy.length / 2;
     if (n < 2) {
       return;
@@ -447,10 +447,10 @@ public class ContourRegion {
    * for polygon enclosures. Note that the test point is never one of the
    * vertices of the segment.
    *
-   * @return a valid instance of a Point2D object
+   * @return a valid instance of a GeoPoint object
    */
-  public Point2D getTestPoint() {
-    return new Point2D.Double(xTest, yTest);
+  public GeoPoint getTestPoint() {
+    return new GeoPoint(xTest, yTest);
   }
 
   /**

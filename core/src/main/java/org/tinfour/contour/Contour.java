@@ -29,9 +29,9 @@
  */
 package org.tinfour.contour;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
+import org.tinfour.geom.GeoAffineTransform;
+import org.tinfour.geom.GeoPath;
+import org.tinfour.geom.GeoRectangle;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.tinfour.common.IQuadEdge;
@@ -303,14 +303,14 @@ public class Contour {
   }
 
   /**
-   * Gets a Path2D suitable for rendering purposes.
+   * Gets a GeoPath suitable for rendering purposes.
    *
-   * @param transform a valid AffineTransform, typically specified to map the
+   * @param transform a valid GeoAffineTransform, typically specified to map the
    * Cartesian coordinates of the contour to pixel coordinate.
    * @return a valid instance
    */
-  public Path2D getPath2D(AffineTransform transform) {
-    Path2D path = new Path2D.Double();
+  public GeoPath getPath2D(GeoAffineTransform transform) {
+    GeoPath path = new GeoPath();
     if (n >= 4) {
       double[] c = new double[n];
       transform.transform(xy, 0, c, 0, n / 2);
@@ -361,8 +361,8 @@ public class Contour {
    * Get the bounds of the contour.
    * @return a valid instance.
    */
-  public Rectangle2D getBounds(){
-    Rectangle2D r2d = new Rectangle2D.Double(xy[0], xy[1], 0, 0);
+  public GeoRectangle getBounds(){
+    GeoRectangle r2d = new GeoRectangle(xy[0], xy[1], 0, 0);
     for(int i=1; i<n/2; i++){
       r2d.add(xy[i*2], xy[i*2+1]);
     }

@@ -30,6 +30,7 @@ import org.tinfour.common.Vertex;
 import org.tinfour.standard.IncrementalTin;
 import org.tinfour.utils.alphashape.AlphaCircle;
 import org.tinfour.utils.alphashape.AlphaShape;
+import org.tinfour.utils.rendering.AwtGeometryAdapter;
 import org.tinfour.utils.rendering.RendererForTinInspection;
 import org.tinfour.utils.rendering.RenderingSurfaceAid;
 
@@ -117,7 +118,7 @@ public class AlphaShapeDemoImage {
     }
 
     if (fillAlphaShape) {
-      Path2D alphaShape = alpha.getPath2D(true);
+      Path2D alphaShape = AwtGeometryAdapter.toPath2D(alpha.getPath2D(true));
       Color fillColor = new Color(0, 0, 0, 16);
       renderer.addOverlay(alphaShape, fillColor, thinStroke, true);
     }
@@ -127,9 +128,9 @@ public class AlphaShapeDemoImage {
     }
 
     if (drawAlphaShape) {
-      Path2D alphaShapePolygons = alpha.getPath2D(true);
+      Path2D alphaShapePolygons = AwtGeometryAdapter.toPath2D(alpha.getPath2D(true));
       renderer.addOverlay(alphaShapePolygons, Color.red, thickStroke, false);
-      Path2D alphaShapeOpenLines = alpha.getPath2D(false);
+      Path2D alphaShapeOpenLines = AwtGeometryAdapter.toPath2D(alpha.getPath2D(false));
       renderer.addOverlay(alphaShapeOpenLines, Color.magenta, thickStroke, false);
     }
 

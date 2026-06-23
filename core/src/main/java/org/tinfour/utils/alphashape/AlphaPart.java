@@ -29,7 +29,7 @@
  */
 package org.tinfour.utils.alphashape;
 
-import java.awt.geom.Path2D;
+import org.tinfour.geom.GeoPath;
 import java.util.ArrayList;
 import java.util.List;
 import org.tinfour.common.IQuadEdge;
@@ -222,16 +222,16 @@ public class AlphaPart {
   }
 
   /**
-   * Get an instance of Path2D populated with coordinates taken from
+   * Get an instance of GeoPath populated with coordinates taken from
    * the edges that define this alpha part. For a polygon part, the defining
    * points will be linked together as a series of connected line segments.
-   * For a non-polygon part, the Path2D will consist of a series of separate
+   * For a non-polygon part, the GeoPath will consist of a series of separate
    * line segments.  Non-polygon parts are no suitable for rendering using
    * Java's area-fill routines.
    * @return a valid instance
    */
-  public Path2D getPath2D() {
-    Path2D p = new Path2D.Double();
+  public GeoPath getPath2D() {
+    GeoPath p = new GeoPath();
 
     if (isPolygon() && Math.abs(getArea()) > 1.0e-6) {
       // edges are connected.  Move to first vertex of first edge,

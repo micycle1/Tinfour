@@ -30,8 +30,8 @@
  */
 package org.tinfour.common;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
+import org.tinfour.geom.GeoAffineTransform;
+import org.tinfour.geom.GeoPath;
 import org.tinfour.vividsolutions.jts.math.DD;
 
 /**
@@ -253,17 +253,17 @@ public class SimpleTriangle {
   }
 
   /**
-   * Gets a Java Path2D based on the geometry of the triangle mapped through an
+   * Gets a Java GeoPath based on the geometry of the triangle mapped through an
    * optional affine transform.
    *
    * @param transform a valid transform, or the null to use the identity
    * transform.
-   * @return a valid instance of a Java Path2D
+   * @return a valid instance of a Java GeoPath
    */
-  public Path2D getPath2D(AffineTransform transform) {
-    AffineTransform af = transform;
+  public GeoPath getPath2D(GeoAffineTransform transform) {
+    GeoAffineTransform af = transform;
     if (transform == null) {
-      af = new AffineTransform();
+      af = new GeoAffineTransform();
     }
     double[] c = new double[12];
 
@@ -278,7 +278,7 @@ public class SimpleTriangle {
     c[5] = C.getY();
     af.transform(c, 0, c, 6, 3);
 
-    Path2D path = new Path2D.Double();
+    GeoPath path = new GeoPath();
     path.moveTo(c[6], c[7]);
     path.lineTo(c[8], c[9]);
     path.lineTo(c[10], c[11]);

@@ -30,8 +30,8 @@
  */
 package org.tinfour.common;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
+import org.tinfour.geom.GeoAffineTransform;
+import org.tinfour.geom.GeoPath;
 import java.util.ArrayList;
 import java.util.List;
 import org.tinfour.utils.KahanSummation;
@@ -248,21 +248,21 @@ public class PolygonConstraint
 
 
   /**
-   * Gets a Java Path2D based on the geometry of the constraint mapped through
+   * Gets a Java GeoPath based on the geometry of the constraint mapped through
    * an optional affine transform.
    *
    * @param transform a valid transform, or the null to use the identity
    * transform.
-   * @return a valid instance of a Java Path2D
+   * @return a valid instance of a Java GeoPath
    */
   @Override
-  public Path2D getPath2D(AffineTransform transform) {
-    AffineTransform af = transform;
+  public GeoPath getPath2D(GeoAffineTransform transform) {
+    GeoAffineTransform af = transform;
     if (transform == null) {
-      af = new AffineTransform();
+      af = new GeoAffineTransform();
     }
     double[] c = new double[4];
-    Path2D path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
+    GeoPath path = new GeoPath(GeoPath.WIND_EVEN_ODD);
     boolean moveFlag = true;
     for (Vertex v : list) {
       c[0] = v.x;

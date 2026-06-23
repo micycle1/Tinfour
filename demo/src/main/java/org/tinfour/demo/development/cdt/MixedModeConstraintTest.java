@@ -63,6 +63,7 @@ import org.tinfour.common.Vertex;
 import org.tinfour.demo.utils.IDevelopmentTest;
 import org.tinfour.demo.utils.TestOptions;
 import org.tinfour.utils.TriangleCollector;
+import org.tinfour.utils.rendering.AwtGeometryAdapter;
 import org.tinfour.utils.rendering.RenderingSurfaceAid;
 
 /**
@@ -99,7 +100,7 @@ public class MixedModeConstraintTest implements IDevelopmentTest {
         }
       }
 
-      Path2D path2d = t.getPath2D(af);
+      Path2D path2d = AwtGeometryAdapter.toPath2D(t.getPath2D(AwtGeometryAdapter.toGeoAffineTransform(af)));
       g2d.setColor(color);
       g2d.fill(path2d);
       g2d.draw(path2d);
@@ -178,7 +179,7 @@ public class MixedModeConstraintTest implements IDevelopmentTest {
       return;
     }
 
-    Rectangle2D bounds = tin.getBounds();
+    Rectangle2D bounds = AwtGeometryAdapter.toRectangle2D(tin.getBounds());
     double x0 = bounds.getMinX();
     double y0 = bounds.getMinY();
     double x1 = bounds.getMaxX();
@@ -221,7 +222,7 @@ public class MixedModeConstraintTest implements IDevelopmentTest {
       } else {
         g2d.setStroke(dashx);
       }
-      Path2D path = c.getPath2D(af);
+      Path2D path = AwtGeometryAdapter.toPath2D(c.getPath2D(AwtGeometryAdapter.toGeoAffineTransform(af)));
       g2d.draw(path);
     }
 

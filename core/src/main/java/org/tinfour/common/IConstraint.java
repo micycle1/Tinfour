@@ -30,8 +30,8 @@
  */
 package org.tinfour.common;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
+import org.tinfour.geom.GeoAffineTransform;
+import org.tinfour.geom.GeoPath;
 import java.util.List;
 
 /**
@@ -201,14 +201,14 @@ public interface IConstraint extends IPolyline {
 
 
   /**
-   * Gets a Java Path2D based on the geometry of the constraint mapped through
+   * Gets a Java GeoPath based on the geometry of the constraint mapped through
    * an optional affine transform.
    *
    * @param transform a valid transform, or the null to use the identity
    * transform.
-   * @return a valid instance of a Java Path2D
+   * @return a valid instance of a Java GeoPath
    */
-  Path2D getPath2D(AffineTransform transform);
+  GeoPath getPath2D(GeoAffineTransform transform);
 
 
   /**

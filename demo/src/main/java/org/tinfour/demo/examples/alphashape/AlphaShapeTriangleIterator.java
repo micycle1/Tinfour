@@ -26,6 +26,7 @@ import org.tinfour.common.SimpleTriangle;
 import org.tinfour.common.Vertex;
 import org.tinfour.standard.IncrementalTin;
 import org.tinfour.utils.alphashape.AlphaShape;
+import org.tinfour.utils.rendering.AwtGeometryAdapter;
 import org.tinfour.utils.rendering.RenderingSurfaceAid;
 
 /**
@@ -78,7 +79,7 @@ public class AlphaShapeTriangleIterator {
     tin.add(vertices, null);
     AlphaShape alpha = new AlphaShape(tin, alphaRadius);
 
-    Rectangle2D bounds = tin.getBounds();
+    Rectangle2D bounds = AwtGeometryAdapter.toRectangle2D(tin.getBounds());
     RenderingSurfaceAid rsa
       = new RenderingSurfaceAid(outputImageWidth, outputImageHeight, outputImagePad,
         bounds.getMinX(),
@@ -133,7 +134,7 @@ public class AlphaShapeTriangleIterator {
       g2d.draw(path);
     }
 
-    Path2D alphaPath = alpha.getPath2D(true);
+    Path2D alphaPath = AwtGeometryAdapter.toPath2D(alpha.getPath2D(true));
     g2d.setColor(Color.black);
     Shape shapeLines = c2p.createTransformedShape(alphaPath);
     g2d.draw(shapeLines);

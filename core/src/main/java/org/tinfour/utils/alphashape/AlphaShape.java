@@ -29,7 +29,7 @@
  */
 package org.tinfour.utils.alphashape;
 
-import java.awt.geom.Path2D;
+import org.tinfour.geom.GeoPath;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -492,19 +492,19 @@ public class AlphaShape {
   }
 
   /**
-   * Gets a instance of a Path2D based on the polygon geometry of the alpha
+   * Gets a instance of a GeoPath based on the polygon geometry of the alpha
    * shape,
    * including any enclosed (hole) features. Non-polygon features are
    * excluded.
    *
    * @return a valid, potentially empty instance.
    */
-  public Path2D getPath2D() {
+  public GeoPath getPath2D() {
     return getPath2D(true);
   }
 
   /**
-   * Gets a instance of a Path2D based on the geometry of the alpha shape,
+   * Gets a instance of a GeoPath based on the geometry of the alpha shape,
    * including any enclosed (hole) features. If polygonFlag option
    * is specified, only valid polygon features will be included
    * (a polygon is considered if it has a non-zero area and is suitable
@@ -515,8 +515,8 @@ public class AlphaShape {
    * if only open-line features are included.
    * @return a valid, potentially empty instance.
    */
-  public Path2D getPath2D(boolean polygonFlag) {
-    Path2D p = new Path2D.Double();
+  public GeoPath getPath2D(boolean polygonFlag) {
+    GeoPath p = new GeoPath();
     for (AlphaPart a : alphaParts) {
       if (polygonFlag) {
         if (a.isPolygon() && Math.abs(a.getArea()) > areaMinThreshold) {
@@ -560,10 +560,10 @@ public class AlphaShape {
    * other polygons. Typically, this selection set represents the
    * outer envelope of the alpha shape.
    *
-   * @return a valid Path2D instance.
+   * @return a valid GeoPath instance.
    */
-  public Path2D getOuterPolygonsPath2D() {
-    Path2D p = new Path2D.Double();
+  public GeoPath getOuterPolygonsPath2D() {
+    GeoPath p = new GeoPath();
     for (AlphaPart a : alphaParts) {
       if (a.isPolygon() && !a.isEnclosed() && Math.abs(a.getArea()) > areaMinThreshold) {
         // edges are connected.  Move to first vertex of first edge,
