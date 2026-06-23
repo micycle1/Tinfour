@@ -71,7 +71,6 @@ public class NaturalNeighborInterpolator implements IInterpolatorOverTin {
   // the tolerance factor for treating closely spaced or identical vertices
   // as a single point.
   final private double vertexTolerance2; // square of vertexTolerance;
-  final private double inCircleThreshold;
   final private double halfPlaneThreshold;
 
   final IIncrementalTin tin;
@@ -116,9 +115,7 @@ public class NaturalNeighborInterpolator implements IInterpolatorOverTin {
   public NaturalNeighborInterpolator(IIncrementalTin tin) {
     Thresholds thresholds = tin.getThresholds();
     geoOp = new GeometricOperations(thresholds);
-
     vertexTolerance2 = thresholds.getVertexTolerance2();
-    inCircleThreshold = thresholds.getInCircleThreshold();
     halfPlaneThreshold = thresholds.getHalfPlaneThreshold();
 
     this.tin = tin;
@@ -354,10 +351,27 @@ public class NaturalNeighborInterpolator implements IInterpolatorOverTin {
         double a22 = n1.getA().y - y;
         double a32 = n1.getB().y - y;
 
-        h = (a11 * a11 + a12 * a12) * (a21 * a32 - a31 * a22)
-          + (a21 * a21 + a22 * a22) * (a31 * a12 - a11 * a32)
-          + (a31 * a31 + a32 * a32) * (a11 * a22 - a21 * a12);
-        if (-inCircleThreshold < h && h < inCircleThreshold) {
+        double s1 = a11 * a11 + a12 * a12;
+        double s2 = a21 * a21 + a22 * a22;
+        double s3 = a31 * a31 + a32 * a32;
+        double p1 = a21 * a32;
+        double p2 = a31 * a22;
+        double p3 = a31 * a12;
+        double p4 = a11 * a32;
+        double p5 = a11 * a22;
+        double p6 = a21 * a12;
+
+        h = s1 * (p1 - p2) + s2 * (p3 - p4) + s3 * (p5 - p6);
+        // Adaptive error bound (Shewchuk): escalate to extended precision
+        // whenever the ordinary-precision result is too small to have a
+        // trustworthy sign relative to the magnitude of the terms involved.
+        // This is scale-invariant and avoids the under-escalation of the
+        // fixed inCircleThreshold for large-magnitude coordinates.
+        double permanent = s1 * (Math.abs(p1) + Math.abs(p2))
+          + s2 * (Math.abs(p3) + Math.abs(p4))
+          + s3 * (Math.abs(p5) + Math.abs(p6));
+        double errBound = Thresholds.IN_CIRCLE_ERROR_BOUND * permanent;
+        if (-errBound <= h && h <= errBound) {
           nInCircleExtended++;
           h = geoOp.inCircleQuadPrecision(
             n0.getA().x, n0.getA().y,
@@ -366,7 +380,6 @@ public class NaturalNeighborInterpolator implements IInterpolatorOverTin {
             x, y);
         }
       }
-
       if (h >= 0) {
         // The vertex is within the circumcircle the associated
         // triangle.  The Thiessen triangle will extend to include
