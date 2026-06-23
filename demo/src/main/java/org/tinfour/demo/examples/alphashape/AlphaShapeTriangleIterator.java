@@ -27,6 +27,7 @@ import org.tinfour.common.Vertex;
 import org.tinfour.standard.IncrementalTin;
 import org.tinfour.utils.alphashape.AlphaShape;
 import org.tinfour.utils.rendering.AwtGeometryAdapter;
+import org.tinfour.utils.rendering.AwtPathWriter;
 import org.tinfour.utils.rendering.RenderingSurfaceAid;
 
 /**
@@ -134,7 +135,7 @@ public class AlphaShapeTriangleIterator {
       g2d.draw(path);
     }
 
-    Path2D alphaPath = AwtGeometryAdapter.toPath2D(alpha.getPath2D(true));
+    Path2D alphaPath = AwtPathWriter.toPath2D(alpha, null);
     g2d.setColor(Color.black);
     Shape shapeLines = c2p.createTransformedShape(alphaPath);
     g2d.draw(shapeLines);

@@ -30,8 +30,7 @@
  */
 package org.tinfour.common;
 
-import org.tinfour.geom.GeoAffineTransform;
-import org.tinfour.geom.GeoPath;
+import org.tinfour.geom.GeometryWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -137,34 +136,20 @@ public class LinearConstraint extends PolyLineConstraintAdapter implements ICons
 
    
   /**
-   * Gets a Java GeoPath based on the geometry of the constraint mapped through
-   * an optional affine transform.
+   * Writes the geometry of this constraint to the specified writer as an open
+   * polyline, in model (Cartesian) coordinates.
    *
-   * @param transform a valid transform, or the null to use the identity
-   * transform.
-   * @return a valid instance of a Java GeoPath
+   * @param writer a valid geometry writer
    */
   @Override
-  public GeoPath getPath2D(GeoAffineTransform transform) {
-    GeoAffineTransform af = transform;
-    if (transform == null) {
-      af = new GeoAffineTransform();
-    }
-    double[] c = new double[4];
-    GeoPath path = new GeoPath();
-    boolean moveFlag = true;
+  public void writeTo(GeometryWriter writer) {
+    double[] xy = new double[list.size() * 2];
+    int k = 0;
     for (Vertex v : list) {
-      c[0] = v.x;
-      c[1] = v.y;
-      af.transform(c, 0, c, 2, 1);
-      if (moveFlag) {
-        moveFlag = false;
-        path.moveTo(c[2], c[3]);
-      } else {
-        path.lineTo(c[2], c[3]);
-      }
+      xy[k++] = v.getX();
+      xy[k++] = v.getY();
     }
-    return path;
+    writer.addPolyline(xy, false);
   }
   
 }

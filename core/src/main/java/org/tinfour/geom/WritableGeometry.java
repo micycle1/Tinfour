@@ -20,31 +20,32 @@
  * Revision History:
  * Date Name Description
  * ------   ---------   -------------------------------------------------
- * 06/2026  M. Carleton Created as part of removing java.awt dependencies
+ * 06/2026  M. Carleton Created
  *
  * Notes:
  *
- *   Lightweight replacement for java.awt.geom.NoninvertibleTransformException.
+ *   The dual of GeometryWriter: an object that can describe its own outline
+ *   geometry to a writer. Implemented by constraints, triangles, contours,
+ *   alpha-shape parts, etc., so that rendering adapters can treat any
+ *   drawable Tinfour object uniformly.
  *
  * -----------------------------------------------------------------------
  */
 package org.tinfour.geom;
 
 /**
- * An exception indicating that a {@link GeoAffineTransform} could not be
- * inverted (its matrix is degenerate). This class is a dependency-free
- * replacement for {@code java.awt.geom.NoninvertibleTransformException}.
+ * Implemented by Tinfour objects that can describe their outline geometry to
+ * a {@link GeometryWriter}. This lets presentation adapters convert any
+ * drawable object (a constraint, a triangle, a contour, an alpha-shape, …) to
+ * their target format through a single, uniform call.
  */
-public class GeoNoninvertibleTransformException extends Exception {
-
-  private static final long serialVersionUID = 1L;
+public interface WritableGeometry {
 
   /**
-   * Constructs an instance with the specified detail message.
+   * Writes the outline geometry of this object, in model (Cartesian)
+   * coordinates, to the specified writer.
    *
-   * @param message a descriptive message
+   * @param writer a valid geometry writer
    */
-  public GeoNoninvertibleTransformException(String message) {
-    super(message);
-  }
+  void writeTo(GeometryWriter writer);
 }

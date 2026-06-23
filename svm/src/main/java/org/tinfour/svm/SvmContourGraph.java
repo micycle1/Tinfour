@@ -68,6 +68,7 @@ import org.tinfour.svm.properties.SvmProperties;
 import org.tinfour.utils.AxisIntervals;
 import org.tinfour.utils.SmoothingFilter;
 import org.tinfour.utils.rendering.AwtGeometryAdapter;
+import org.tinfour.utils.rendering.AwtPathWriter;
 import org.tinfour.utils.rendering.RenderingSurfaceAid;
 
 /**
@@ -400,7 +401,7 @@ class SvmContourGraph {
       } else {
         g2d.setColor(Color.white);
       }
-      Path2D path = AwtGeometryAdapter.toPath2D(p.getPath2D(AwtGeometryAdapter.toGeoAffineTransform(af)));
+      Path2D path = AwtPathWriter.toPath2D(p, af);
       g2d.fill(path);
       g2d.draw(path);
     }
@@ -414,7 +415,7 @@ class SvmContourGraph {
       }
       color = getColor(rIndex, 0, iN);
       g2d.setColor(color);
-      Path2D path = AwtGeometryAdapter.toPath2D(region.getPath2D(AwtGeometryAdapter.toGeoAffineTransform(af)));
+      Path2D path = AwtPathWriter.toPath2D(region, af);
       g2d.fill(path);
       g2d.draw(path);
     }
@@ -425,7 +426,7 @@ class SvmContourGraph {
     List<Contour> contours = builder.getContours();
     for (Contour c : contours) {
       if (c.getContourType() == Contour.ContourType.Interior) {
-        Path2D path = AwtGeometryAdapter.toPath2D(c.getPath2D(AwtGeometryAdapter.toGeoAffineTransform(af)));
+        Path2D path = AwtPathWriter.toPath2D(c, af);
         g2d.draw(path);
       }
     }
@@ -435,7 +436,7 @@ class SvmContourGraph {
     g2d.setColor(Color.white);
     for (PolygonConstraint p : boundaryConstraints) {
       if (p.getArea() < 0) {
-        Path2D path = AwtGeometryAdapter.toPath2D(p.getPath2D(AwtGeometryAdapter.toGeoAffineTransform(af)));
+        Path2D path = AwtPathWriter.toPath2D(p, af);
         g2d.fill(path);
       }
     }
@@ -449,7 +450,7 @@ class SvmContourGraph {
     for (IConstraint con : boundaryConstraints) {
       if (con instanceof PolygonConstraint) {
         PolygonConstraint p = (PolygonConstraint) con;
-        Path2D path = AwtGeometryAdapter.toPath2D(p.getPath2D(AwtGeometryAdapter.toGeoAffineTransform(af)));
+        Path2D path = AwtPathWriter.toPath2D(p, af);
         g2d.draw(path);
       }
     }

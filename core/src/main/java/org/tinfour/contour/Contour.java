@@ -29,9 +29,9 @@
  */
 package org.tinfour.contour;
 
-import org.tinfour.geom.GeoAffineTransform;
-import org.tinfour.geom.GeoPath;
+import org.tinfour.geom.GeometryWriter;
 import org.tinfour.geom.GeoRectangle;
+import org.tinfour.geom.WritableGeometry;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.tinfour.common.IQuadEdge;
@@ -59,7 +59,7 @@ import org.tinfour.common.Vertex;
  * is provided by the application.
  *
  */
-public class Contour {
+public class Contour implements WritableGeometry {
 
   static final AtomicInteger serialIdSource = new AtomicInteger();
 
@@ -303,27 +303,17 @@ public class Contour {
   }
 
   /**
-   * Gets a GeoPath suitable for rendering purposes.
+   * Writes the geometry of this contour to the specified writer as a polyline
+   * (closed if this contour is a closed loop), in model (Cartesian)
+   * coordinates.
    *
-   * @param transform a valid GeoAffineTransform, typically specified to map the
-   * Cartesian coordinates of the contour to pixel coordinate.
-   * @return a valid instance
+   * @param writer a valid geometry writer
    */
-  public GeoPath getPath2D(GeoAffineTransform transform) {
-    GeoPath path = new GeoPath();
+  @Override
+  public void writeTo(GeometryWriter writer) {
     if (n >= 4) {
-      double[] c = new double[n];
-      transform.transform(xy, 0, c, 0, n / 2);
-
-      path.moveTo(c[0], c[1]);
-      for (int i = 1; i < n / 2; i++) {
-        path.lineTo(c[i * 2], c[i * 2 + 1]);
-      }
-      if (this.closedLoop) {
-        path.closePath();
-      }
+      writer.addPolyline(Arrays.copyOf(xy, n), this.closedLoop);
     }
-    return path;
   }
 
   /**

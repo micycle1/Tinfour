@@ -29,9 +29,9 @@
  */
 package org.tinfour.contour;
 
-import org.tinfour.geom.GeoAffineTransform;
-import org.tinfour.geom.GeoPath;
+import org.tinfour.geom.GeometryWriter;
 import org.tinfour.geom.GeoPoint;
+import org.tinfour.geom.WritableGeometry;
 import java.util.ArrayList;
 import java.util.List;
 import org.tinfour.contour.Contour.ContourType;
@@ -40,7 +40,7 @@ import org.tinfour.contour.Contour.ContourType;
  * Provides a elements and access methods for a region created through a
  * contour-building process.
  */
-public class ContourRegion {
+public class ContourRegion implements WritableGeometry {
 
   /**
    * An enumeration that indicates the type of a contour region.
@@ -375,71 +375,39 @@ public class ContourRegion {
   }
 
   /**
-   * Gets a GeoPath suitable for rendering purposes. The path includes only the
-   * outer polygon for the region and does not include the internal (nested)
-   * polygons. Because the contour builder class sorts polygons by descending
-   * area, this method will general attain the same effect as the conventional
-   * getPath2D() call when rendering the full set of regions. However, this
-   * method is not suitable in cases where interior regions are to be omitted
-   * or filled with a semi-transparent color.
+   * Writes the outer polygon of this region to the specified writer, without
+   * any of its internal (nested child) polygons, in model (Cartesian)
+   * coordinates. Because the contour builder sorts polygons by descending
+   * area, writing the full set of regions this way generally attains the same
+   * visual effect as {@link #writeTo(GeometryWriter)}. However, it is not
+   * suitable in cases where interior regions are to be omitted or filled with
+   * a semi-transparent color.
    *
-   * @param transform a valid GeoAffineTransform, typically specified to map the
-   * Cartesian coordinates of the contour to pixel coordinate.
-   * @return a valid instance
+   * @param writer a valid geometry writer
    */
-  public GeoPath getPath2DWithoutNesting(GeoAffineTransform transform) {
-    GeoAffineTransform af = transform;
-    if (af == null) {
-      af = new GeoAffineTransform();  // identity transform
-    }
-    double[] xy = getXY();
-    GeoPath path = new GeoPath();
-    appendPathForward(af, path, xy);
-    return path;
+  public void writeOutlineTo(GeometryWriter writer) {
+    writer.addPolygon(getXY(), null);
   }
 
   /**
-   * Gets a GeoPath suitable for rendering purposes including both the outer
-   * polygon and any internal (nested child) polygons. In used for fill
-   * operations, regions that include nested child regions will be rendered with
-   * "holes" where the child polygons are indicated.
+   * Writes this region to the specified writer as a polygon, in model
+   * (Cartesian) coordinates, including the outer polygon and any internal
+   * (nested child) polygons as holes. When used for fill operations, regions
+   * that include nested child regions are rendered with "holes" where the
+   * child polygons are indicated.
    *
-   * @param transform a valid GeoAffineTransform, typically specified to map the
-   * Cartesian coordinates of the contour to pixel coordinate.
-   * @return a valid instance
+   * @param writer a valid geometry writer
    */
-  public GeoPath getPath2D(GeoAffineTransform transform) {
-    GeoAffineTransform af = transform;
-    if (af == null) {
-      af = new GeoAffineTransform();  // identity transform
+  @Override
+  public void writeTo(GeometryWriter writer) {
+    double[][] holes = null;
+    if (!children.isEmpty()) {
+      holes = new double[children.size()][];
+      for (int i = 0; i < children.size(); i++) {
+        holes[i] = children.get(i).getXY();
+      }
     }
-    double[] xy = getXY();
-    GeoPath path = new GeoPath();
-    path.setWindingRule(GeoPath.WIND_EVEN_ODD);
-    appendPathForward(transform, path, xy);
-    for (ContourRegion child : children) {
-      xy = child.getXY();
-      appendPathForward(af, path, xy);
-    }
-
-    return path;
-  }
-
-  private void appendPathForward(
-    GeoAffineTransform transform, GeoPath path, double[] xy) {
-    int n = xy.length / 2;
-    if (n < 2) {
-      return;
-    }
-
-    double[] c = new double[n * 2];
-    transform.transform(xy, 0, c, 0, n);
-
-    path.moveTo(c[0], c[1]);
-    for (int i = 1; i < n; i++) {
-      path.lineTo(c[i * 2], c[i * 2 + 1]);
-    }
-    path.closePath();
+    writer.addPolygon(getXY(), holes);
   }
 
   /**

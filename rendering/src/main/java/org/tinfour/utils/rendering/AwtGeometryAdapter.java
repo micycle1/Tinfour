@@ -20,7 +20,7 @@
  * Revision History:
  * Date Name Description
  * ------   ---------   -------------------------------------------------
- * 00/2025  G. Lucas    Created as part of removing java.awt dependencies
+ * 06/2026  M. Carleton Created as part of removing java.awt dependencies
  *
  * Notes:
  *
@@ -36,12 +36,10 @@ package org.tinfour.utils.rendering;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import org.tinfour.geom.GeoAffineTransform;
 import org.tinfour.geom.GeoLine;
-import org.tinfour.geom.GeoPath;
 import org.tinfour.geom.GeoPoint;
 import org.tinfour.geom.GeoRectangle;
 
@@ -125,42 +123,5 @@ public final class AwtGeometryAdapter {
       return null;
     }
     return new Point2D.Double(p.getX(), p.getY());
-  }
-
-  /**
-   * Converts a Tinfour path to a {@code java.awt.geom.Path2D}, preserving the
-   * winding rule and the sequence of move, line, and close operations.
-   *
-   * @param path a valid path, or null
-   * @return an equivalent AWT path, or null if the input was null
-   */
-  public static Path2D toPath2D(GeoPath path) {
-    if (path == null) {
-      return null;
-    }
-    int rule = path.getWindingRule() == GeoPath.WIND_EVEN_ODD
-            ? Path2D.WIND_EVEN_ODD : Path2D.WIND_NON_ZERO;
-    Path2D p = new Path2D.Double(rule);
-    int[] types = path.getSegmentTypes();
-    double[] c = path.getCoordinates();
-    int k = 0;
-    for (int type : types) {
-      switch (type) {
-        case GeoPath.SEG_MOVETO:
-          p.moveTo(c[k], c[k + 1]);
-          k += 2;
-          break;
-        case GeoPath.SEG_LINETO:
-          p.lineTo(c[k], c[k + 1]);
-          k += 2;
-          break;
-        case GeoPath.SEG_CLOSE:
-          p.closePath();
-          break;
-        default:
-          throw new IllegalStateException("Unexpected path segment type " + type);
-      }
-    }
-    return p;
   }
 }

@@ -30,8 +30,7 @@
  */
 package org.tinfour.common;
 
-import org.tinfour.geom.GeoAffineTransform;
-import org.tinfour.geom.GeoPath;
+import org.tinfour.geom.WritableGeometry;
 import java.util.List;
 
 /**
@@ -85,7 +84,7 @@ import java.util.List;
  *
  *
  */
-public interface IConstraint extends IPolyline {
+public interface IConstraint extends IPolyline, WritableGeometry {
 
   /**
    * Indicates whether the constraint applies a constrained region behavior
@@ -200,15 +199,6 @@ public interface IConstraint extends IPolyline {
 
 
 
-  /**
-   * Gets a Java GeoPath based on the geometry of the constraint mapped through
-   * an optional affine transform.
-   *
-   * @param transform a valid transform, or the null to use the identity
-   * transform.
-   * @return a valid instance of a Java GeoPath
-   */
-  GeoPath getPath2D(GeoAffineTransform transform);
 
 
   /**

@@ -59,6 +59,7 @@ import org.tinfour.geom.GeoLine;
 import org.tinfour.standard.IncrementalTin;
 import org.tinfour.utils.TriangleCollector;
 import org.tinfour.utils.rendering.AwtGeometryAdapter;
+import org.tinfour.utils.rendering.AwtPathWriter;
 import org.tinfour.utils.rendering.RenderingSurfaceAid;
 
 /**
@@ -90,8 +91,7 @@ public class ConstraintStarDemo extends JPanel {
         Object obj = constraint.getApplicationData();
         if (obj instanceof Color) {
           g2d.setColor((Color) obj);
-          Path2D path = AwtGeometryAdapter.toPath2D(
-                  t.getPath2D(AwtGeometryAdapter.toGeoAffineTransform(af)));
+          Path2D path = AwtPathWriter.toPath2D(t, af);
           g2d.fill(path);
           g2d.draw(path);
         }
