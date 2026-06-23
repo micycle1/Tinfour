@@ -930,7 +930,23 @@ public class IncrementalTin implements IIncrementalTin {
     n2.setForward(p.getDual());
 
     c = searchEdge;
+    // Safety guard against a non-terminating cavity construction.  In a
+    // well-formed mesh the walk around the insertion cavity returns to the
+    // anchor in fewer steps than there are edges in the TIN.  If numerically
+    // degenerate input produces an inconsistent (non-star-shaped) cavity, the
+    // exit condition (c.getB() == anchor) may never be met; rather than loop
+    // forever we throw so that the caller can recover (see issue #139).
+    final int maxInsertionSteps = 2 * edgePool.size() + 16;
+    int nInsertionSteps = 0;
     while (true) {
+      if (++nInsertionSteps > maxInsertionSteps) {
+        throw new IllegalStateException(
+          "Vertex insertion failed to converge near ("
+          + x + ", " + y + "), most likely due to numerically degenerate"
+          + " input. Consider constructing the TIN with a nominal point"
+          + " spacing representative of the sample data"
+          + " (e.g. new IncrementalTin(spacing)).");
+      }
       n0 = c.getDual();
       n1 = n0.getForward();
 
@@ -962,10 +978,26 @@ public class IncrementalTin implements IIncrementalTin {
         double a22 = vB.y - y;
         double a32 = vC.y - y;
 
-        h = (a11 * a11 + a12 * a12) * (a21 * a32 - a31 * a22)
-          + (a21 * a21 + a22 * a22) * (a31 * a12 - a11 * a32)
-          + (a31 * a31 + a32 * a32) * (a11 * a22 - a21 * a12);
-        if (inCircleThresholdNeg < h && h < inCircleThreshold) {
+        double s1 = a11 * a11 + a12 * a12;
+        double s2 = a21 * a21 + a22 * a22;
+        double s3 = a31 * a31 + a32 * a32;
+        double p1 = a21 * a32;
+        double p2 = a31 * a22;
+        double p3 = a31 * a12;
+        double p4 = a11 * a32;
+        double p5 = a11 * a22;
+        double p6 = a21 * a12;
+        h = s1 * (p1 - p2) + s2 * (p3 - p4) + s3 * (p5 - p6);
+        // Adaptive error bound (Shewchuk): escalate to extended precision
+        // whenever the ordinary-precision result is too small to have a
+        // trustworthy sign relative to the magnitude of the terms involved.
+        // This is scale-invariant and avoids the under-escalation of the
+        // fixed inCircleThreshold for large-magnitude coordinates.
+        double permanent = s1 * (Math.abs(p1) + Math.abs(p2))
+          + s2 * (Math.abs(p3) + Math.abs(p4))
+          + s3 * (Math.abs(p5) + Math.abs(p6));
+        double errBound = Thresholds.IN_CIRCLE_ERROR_BOUND * permanent;
+        if (-errBound <= h && h <= errBound) {
           nInCircleExtendedPrecision++;
           double h2 = h;
           h = geoOp.inCircleQuadPrecision(
@@ -1297,7 +1329,19 @@ public class IncrementalTin implements IIncrementalTin {
       }
     }
 
+    // Safety guard against a non-terminating cavity construction; see the
+    // corresponding note in addWithInsertOrAppend and issue #139.
+    final int maxInsertionSteps = 2 * edgePool.size() + 16;
+    int nInsertionSteps = 0;
     while (true) {
+      if (++nInsertionSteps > maxInsertionSteps) {
+        throw new IllegalStateException(
+          "Vertex insertion failed to converge near ("
+          + x + ", " + y + "), most likely due to numerically degenerate"
+          + " input. Consider constructing the TIN with a nominal point"
+          + " spacing representative of the sample data"
+          + " (e.g. new IncrementalTin(spacing)).");
+      }
       n0 = c.getDual();
       n1 = n0.getForward();
 
@@ -1329,10 +1373,22 @@ public class IncrementalTin implements IIncrementalTin {
         double a22 = vB.y - y;
         double a32 = vC.y - y;
 
-        h = (a11 * a11 + a12 * a12) * (a21 * a32 - a31 * a22)
-          + (a21 * a21 + a22 * a22) * (a31 * a12 - a11 * a32)
-          + (a31 * a31 + a32 * a32) * (a11 * a22 - a21 * a12);
-        if (inCircleThresholdNeg < h && h < inCircleThreshold) {
+        double s1 = a11 * a11 + a12 * a12;
+        double s2 = a21 * a21 + a22 * a22;
+        double s3 = a31 * a31 + a32 * a32;
+        double p1 = a21 * a32;
+        double p2 = a31 * a22;
+        double p3 = a31 * a12;
+        double p4 = a11 * a32;
+        double p5 = a11 * a22;
+        double p6 = a21 * a12;
+        h = s1 * (p1 - p2) + s2 * (p3 - p4) + s3 * (p5 - p6);
+        // Adaptive error bound (Shewchuk): see addWithInsertOrAppend.
+        double permanent = s1 * (Math.abs(p1) + Math.abs(p2))
+          + s2 * (Math.abs(p3) + Math.abs(p4))
+          + s3 * (Math.abs(p5) + Math.abs(p6));
+        double errBound = Thresholds.IN_CIRCLE_ERROR_BOUND * permanent;
+        if (-errBound <= h && h <= errBound) {
           nInCircleExtendedPrecision++;
           double h2 = h;
           h = geoOp.inCircleQuadPrecision(
