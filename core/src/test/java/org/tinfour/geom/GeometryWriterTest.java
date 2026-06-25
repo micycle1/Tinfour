@@ -15,17 +15,22 @@
  */
 package org.tinfour.geom;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import org.junit.Test;
+import java.util.Set;
+import org.junit.jupiter.api.Test;
 import org.tinfour.common.LinearConstraint;
 import org.tinfour.common.PolygonConstraint;
+import org.tinfour.common.SimpleTriangle;
+import org.tinfour.common.SimpleTriangleIterator;
 import org.tinfour.common.Vertex;
+import org.tinfour.standard.IncrementalTin;
 
 /**
  * Verifies that the path-producing core types describe their geometry to a
@@ -68,11 +73,11 @@ public class GeometryWriterTest {
     Recorder r = new Recorder();
     p.writeTo(r);
 
-    assertTrue("no polylines expected", r.polylines.isEmpty());
-    assertEquals("one polygon expected", 1, r.polygonShells.size());
+    assertTrue(r.polylines.isEmpty(), "no polylines expected");
+    assertEquals(1, r.polygonShells.size(), "one polygon expected");
     assertArrayEquals(new double[]{0, 0, 4, 0, 4, 3}, r.polygonShells.get(0), EPS);
-    assertTrue("no holes expected", r.polygonHoles.get(0) == null
-            || r.polygonHoles.get(0).length == 0);
+    assertTrue(r.polygonHoles.get(0) == null
+            || r.polygonHoles.get(0).length == 0, "no holes expected");
   }
 
   @Test
@@ -86,9 +91,46 @@ public class GeometryWriterTest {
     Recorder r = new Recorder();
     c.writeTo(r);
 
-    assertTrue("no polygons expected", r.polygonShells.isEmpty());
-    assertEquals("one polyline expected", 1, r.polylines.size());
-    assertFalse("polyline must be open", r.polylineClosed.get(0));
+    assertTrue(r.polygonShells.isEmpty(), "no polygons expected");
+    assertEquals(1, r.polylines.size(), "one polyline expected");
+    assertFalse(r.polylineClosed.get(0), "polyline must be open");
     assertArrayEquals(new double[]{1, 2, 3, 5, 7, 1}, r.polylines.get(0), EPS);
+  }
+
+  @Test
+  public void simpleTriangleWritesClosedTriangleNoHoles() {
+    // a TIN of exactly three vertices contains a single triangle
+    IncrementalTin tin = new IncrementalTin(1.0);
+    List<Vertex> v = new ArrayList<>();
+    v.add(new Vertex(0, 0, 0, 0));
+    v.add(new Vertex(1, 0, 0, 1));
+    v.add(new Vertex(0, 1, 0, 2));
+    tin.add(v, null);
+
+    SimpleTriangleIterator it = new SimpleTriangleIterator(tin);
+    assertTrue(it.hasNext(), "expected at least one triangle");
+    SimpleTriangle t = it.next();
+
+    Recorder r = new Recorder();
+    t.writeTo(r);
+
+    assertTrue(r.polylines.isEmpty(), "no polylines expected");
+    assertEquals(1, r.polygonShells.size(), "one polygon expected");
+    double[] shell = r.polygonShells.get(0);
+    assertEquals(6, shell.length, "a triangle has three vertices");
+    assertTrue(r.polygonHoles.get(0) == null
+            || r.polygonHoles.get(0).length == 0, "no holes expected");
+
+    // the three emitted vertices must be the three input vertices (the winding
+    // order is determined by the triangulation, so compare as a set)
+    Set<String> emitted = new HashSet<>();
+    for (int i = 0; i < 3; i++) {
+      emitted.add(shell[i * 2] + "," + shell[i * 2 + 1]);
+    }
+    Set<String> expected = new HashSet<>();
+    expected.add("0.0,0.0");
+    expected.add("1.0,0.0");
+    expected.add("0.0,1.0");
+    assertEquals(expected, emitted);
   }
 }
